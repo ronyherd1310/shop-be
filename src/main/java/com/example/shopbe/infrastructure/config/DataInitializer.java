@@ -1,6 +1,8 @@
 package com.example.shopbe.infrastructure.config;
 
 import com.example.shopbe.domain.entity.OrderItem;
+import com.example.shopbe.domain.repository.OrderRepository;
+import com.example.shopbe.domain.repository.ProductRepository;
 import com.example.shopbe.domain.usecase.CreateOrderUseCase;
 import com.example.shopbe.domain.usecase.CreateProductUseCase;
 import org.springframework.boot.CommandLineRunner;
@@ -14,16 +16,32 @@ public class DataInitializer implements CommandLineRunner {
 
     private final CreateProductUseCase createProductUseCase;
     private final CreateOrderUseCase createOrderUseCase;
+    private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
 
-    public DataInitializer(CreateProductUseCase createProductUseCase, CreateOrderUseCase createOrderUseCase) {
+    public DataInitializer(CreateProductUseCase createProductUseCase,
+                          CreateOrderUseCase createOrderUseCase,
+                          ProductRepository productRepository,
+                          OrderRepository orderRepository) {
         this.createProductUseCase = createProductUseCase;
         this.createOrderUseCase = createOrderUseCase;
+        this.productRepository = productRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        initializeProducts();
-        initializeOrders();
+        if (productRepository.findAll().isEmpty()) {
+            System.out.println("Database is empty, initializing with sample data...");
+            initializeProducts();
+        } 
+        if (orderRepository.findAll().isEmpty()) {
+            System.out.println("Database is empty, initializing with sample data...");
+            initializeOrders();
+        }
+        else {
+            System.out.println("Database already contains data, skipping initialization.");
+        }
     }
 
     private void initializeProducts() {

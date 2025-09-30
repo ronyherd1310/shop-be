@@ -1,18 +1,43 @@
 package com.example.shopbe.domain.entity;
 
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Entity
+@Table(name = "orders")
 public class Order {
-    private final Long id;
-    private final String customerName;
-    private final String customerEmail;
-    private final List<OrderItem> items;
-    private final BigDecimal totalAmount;
-    private final OrderStatus status;
-    private final LocalDateTime createdAt;
-    private final LocalDateTime transactionDate;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public final Long id;
+    @Column(name = "customer_name", nullable = false)
+    public final String customerName;
+    @Column(name = "customer_email", nullable = false)
+    public final String customerEmail;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    public final List<OrderItem> items;
+    @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
+    public final BigDecimal totalAmount;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    public final OrderStatus status;
+    @Column(name = "created_at", nullable = false)
+    public final LocalDateTime createdAt;
+    @Column(name = "transaction_date", nullable = false)
+    public final LocalDateTime transactionDate;
+
+    public Order() {
+        this.id = null;
+        this.customerName = null;
+        this.customerEmail = null;
+        this.items = null;
+        this.totalAmount = null;
+        this.status = null;
+        this.createdAt = null;
+        this.transactionDate = null;
+    }
 
     public Order(Long id, String customerName, String customerEmail,
                  List<OrderItem> items, BigDecimal totalAmount,
@@ -27,35 +52,16 @@ public class Order {
         this.transactionDate = transactionDate;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getCustomerName() {
-        return customerName;
-    }
-
-    public String getCustomerEmail() {
-        return customerEmail;
-    }
-
-    public List<OrderItem> getItems() {
-        return items;
-    }
-
-    public BigDecimal getTotalAmount() {
-        return totalAmount;
-    }
-
-    public OrderStatus getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getTransactionDate() {
-        return transactionDate;
+    public Order(String customerName, String customerEmail,
+                 List<OrderItem> items, BigDecimal totalAmount,
+                 OrderStatus status, LocalDateTime createdAt, LocalDateTime transactionDate) {
+        this.id = null;
+        this.customerName = customerName;
+        this.customerEmail = customerEmail;
+        this.items = items;
+        this.totalAmount = totalAmount;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.transactionDate = transactionDate;
     }
 }

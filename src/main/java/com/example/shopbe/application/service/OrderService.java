@@ -11,17 +11,16 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Service
 public class OrderService implements CreateOrderUseCase, GetOrderUseCase, ListOrdersUseCase {
 
     private final OrderRepository orderRepository;
-    private final AtomicLong idGenerator = new AtomicLong(1);
 
     public OrderService(OrderRepository orderRepository) {
         this.orderRepository = orderRepository;
@@ -52,24 +51,22 @@ public class OrderService implements CreateOrderUseCase, GetOrderUseCase, ListOr
 
     private BigDecimal calculateTotalAmount(List<OrderItem> items) {
         return items.stream()
-                .map(OrderItem::getSubtotal)
+                .map(item -> item.subtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private Map<Long, Integer> convertItemsToProductQuantityMap(List<OrderItem> items) {
         return items.stream()
                 .collect(Collectors.toMap(
-                        OrderItem::getProductId,
-                        OrderItem::getQuantity,
+                        item -> item.productId,
+                        item -> item.quantity,
                         Integer::sum
                 ));
     }
 
     private Order createNewOrder(String customerName, String customerEmail, List<OrderItem> items) {
-        Long id = idGenerator.getAndIncrement();
         BigDecimal totalAmount = calculateTotalAmount(items);
         Order order = new Order(
-                id,
                 customerName,
                 customerEmail,
                 items,
@@ -78,30 +75,41 @@ public class OrderService implements CreateOrderUseCase, GetOrderUseCase, ListOr
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
+
         return orderRepository.save(order);
     }
 
     private Order updateExistingOrder(Order existingOrder, String customerName, String customerEmail, List<OrderItem> items) {
-        Map<Long, Integer> updatedQuantity = convertItemsToProductQuantityMap(items);
-        List<OrderItem> updatedItems = existingOrder.getItems().stream()
-                .map(item -> new OrderItem(
-                        item.getProductId(),
-                        item.getProductName(),
-                        item.getUnitPrice(),
-                        item.getQuantity() + updatedQuantity.getOrDefault(item.getProductId(), 0)
-                ))
+        Map<Long, Integer> newQuantities = convertItemsToProductQuantityMap(items);
+        Map<Long, OrderItem> existingItemsMap = existingOrder.items.stream()
+                .collect(Collectors.toMap(item -> item.productId, item -> item));
+
+        List<OrderItem> updatedItems = items.stream()
+                .map(newItem -> existingItemsMap.containsKey(newItem.productId)
+                        ? new OrderItem(
+                                existingItemsMap.get(newItem.productId).id,
+                                newItem.productId,
+                                newItem.productName,
+                                newItem.unitPrice,
+                                newQuantities.get(newItem.productId))
+                        : new OrderItem(
+                                newItem.productId,
+                                newItem.productName,
+                                newItem.unitPrice,
+                                newQuantities.get(newItem.productId)))
                 .collect(Collectors.toList());
 
         Order updatedOrder = new Order(
-                existingOrder.getId(),
+                existingOrder.id,
                 customerName,
                 customerEmail,
                 updatedItems,
                 calculateTotalAmount(updatedItems),
-                existingOrder.getStatus(),
-                existingOrder.getCreatedAt(),
-                existingOrder.getTransactionDate()
+                existingOrder.status,
+                existingOrder.createdAt,
+                existingOrder.transactionDate
         );
+
         return orderRepository.save(updatedOrder);
     }
 }

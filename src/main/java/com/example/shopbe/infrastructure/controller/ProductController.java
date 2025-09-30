@@ -30,9 +30,9 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<Product> createProduct(@RequestBody CreateProductRequest request) {
         Product product = createProductUseCase.createProduct(
-                request.getName(),
-                request.getDescription(),
-                request.getPrice()
+                request.name(),
+                request.description(),
+                request.price()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(product);
     }

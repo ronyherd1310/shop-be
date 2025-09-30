@@ -9,11 +9,13 @@ import com.example.shopbe.domain.usecase.GetProductUseCase;
 import com.example.shopbe.domain.usecase.ListOrdersUseCase;
 import com.example.shopbe.infrastructure.controller.dto.CreateOrderItemRequest;
 import com.example.shopbe.infrastructure.controller.dto.CreateOrderRequest;
+import com.example.shopbe.infrastructure.controller.dto.CreateOrderResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -36,16 +38,16 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody CreateOrderRequest request) {
+    public ResponseEntity<CreateOrderResponse> createOrder(@RequestBody CreateOrderRequest request) {
         try {
             Order order = createOrderUseCase.createOrder(
-                request.getCustomerName(),
-                request.getCustomerEmail(),
-                convertToOrderItems(request.getItems())
+                request.customerName(),
+                request.customerEmail(),
+                convertToOrderItems(request.items())
             );
-            return ResponseEntity.status(HttpStatus.CREATED).body(order);
+            return ResponseEntity.status(HttpStatus.CREATED).body(convertToOrderResponse(order,""));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(convertToOrderResponse(new Order(), e.getMessage()));
         }
     }
 
@@ -75,14 +77,30 @@ public class OrderController {
     }
 
     private OrderItem convertToOrderItem(CreateOrderItemRequest itemRequest) {
-        Product product = getProductUseCase.getProductById(itemRequest.getProductId())
-                .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + itemRequest.getProductId()));
+        Product product = getProductUseCase.getProductById(itemRequest.productId())
+                .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + itemRequest.productId()));
 
         return new OrderItem(
-                product.getId(),
-                product.getName(),
-                product.getPrice(),
-                itemRequest.getQuantity()
+                product.id,
+                product.name,
+                product.price,
+                itemRequest.quantity()
+        );
+    }
+
+    private CreateOrderResponse convertToOrderResponse(Order order, String errorMessage) {
+        List<CreateOrderItemRequest> responseItems = Optional.ofNullable(order)
+                .map(o -> o.items)
+                .map(items -> items.stream()
+                        .map(item -> new CreateOrderItemRequest(item.productId, item.quantity))
+                        .collect(Collectors.toList()))
+                .orElse(List.of());
+
+        return new CreateOrderResponse(
+                Optional.ofNullable(order).map(o -> o.customerName).orElse(null),
+                Optional.ofNullable(order).map(o -> o.customerEmail).orElse(null),
+                responseItems,
+                errorMessage
         );
     }
 }
