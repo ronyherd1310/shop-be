@@ -10,7 +10,10 @@ import com.example.shopbe.domain.usecase.ListOrdersUseCase;
 import com.example.shopbe.infrastructure.controller.dto.CreateOrderItemRequest;
 import com.example.shopbe.infrastructure.controller.dto.CreateOrderRequest;
 import com.example.shopbe.infrastructure.controller.dto.CreateOrderResponse;
+import com.example.shopbe.infrastructure.util.InputSanitizer;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,23 +29,33 @@ public class OrderController {
     private final GetOrderUseCase getOrderUseCase;
     private final ListOrdersUseCase listOrdersUseCase;
     private final GetProductUseCase getProductUseCase;
+    private final InputSanitizer inputSanitizer;
 
     public OrderController(CreateOrderUseCase createOrderUseCase,
                           GetOrderUseCase getOrderUseCase,
                           ListOrdersUseCase listOrdersUseCase,
-                          GetProductUseCase getProductUseCase) {
+                          GetProductUseCase getProductUseCase,
+                          InputSanitizer inputSanitizer) {
         this.createOrderUseCase = createOrderUseCase;
         this.getOrderUseCase = getOrderUseCase;
         this.listOrdersUseCase = listOrdersUseCase;
         this.getProductUseCase = getProductUseCase;
+        this.inputSanitizer = inputSanitizer;
     }
 
-    @PostMapping
-    public ResponseEntity<CreateOrderResponse> createOrder(@RequestBody CreateOrderRequest request) {
+    @PostMapping(
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<CreateOrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
         try {
+            // Sanitize inputs
+            String sanitizedName = inputSanitizer.sanitize(request.customerName());
+            String sanitizedEmail = inputSanitizer.sanitizeEmail(request.customerEmail());
+
             Order order = createOrderUseCase.createOrder(
-                request.customerName(),
-                request.customerEmail(),
+                sanitizedName,
+                sanitizedEmail,
                 convertToOrderItems(request.items())
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(convertToOrderResponse(order,""));

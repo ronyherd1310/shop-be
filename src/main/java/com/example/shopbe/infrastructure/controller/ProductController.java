@@ -32,7 +32,8 @@ public class ProductController {
         Product product = createProductUseCase.createProduct(
                 request.name(),
                 request.description(),
-                request.price()
+                request.price(),
+                ""
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(product);
     }

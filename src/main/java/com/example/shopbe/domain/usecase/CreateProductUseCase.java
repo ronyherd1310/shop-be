@@ -5,5 +5,5 @@ import com.example.shopbe.domain.entity.Product;
 import java.math.BigDecimal;
 
 public interface CreateProductUseCase {
-    Product createProduct(String name, String description, BigDecimal price);
+    Product createProduct(String name, String description, BigDecimal price, String url);
 }

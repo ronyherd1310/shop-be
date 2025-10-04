@@ -48,61 +48,71 @@ public class DataInitializer implements CommandLineRunner {
         createProductUseCase.createProduct(
                 "Gaming Laptop",
                 "High-performance gaming laptop with RTX 4070 graphics card",
-                new BigDecimal("1299.99")
+                new BigDecimal("1299.99"),
+                "https://example.com/products/gaming-laptop"
         );
 
         createProductUseCase.createProduct(
                 "Wireless Headphones",
                 "Premium noise-cancelling wireless headphones with 30-hour battery",
-                new BigDecimal("249.99")
+                new BigDecimal("249.99"),
+                "https://example.com/products/wireless-headphones"
         );
 
         createProductUseCase.createProduct(
                 "Smartphone",
                 "Latest flagship smartphone with 128GB storage and triple camera",
-                new BigDecimal("799.99")
+                new BigDecimal("799.99"),
+                "https://example.com/products/smartphone"
         );
 
         createProductUseCase.createProduct(
                 "Mechanical Keyboard",
                 "RGB backlit mechanical keyboard with Cherry MX Blue switches",
-                new BigDecimal("149.99")
+                new BigDecimal("149.99"),
+                "https://example.com/products/mechanical-keyboard"
         );
 
         createProductUseCase.createProduct(
                 "4K Monitor",
                 "27-inch 4K UHD monitor with IPS panel and USB-C connectivity",
-                new BigDecimal("449.99")
+                new BigDecimal("449.99"),
+                "https://example.com/products/4k-monitor"
         );
 
         createProductUseCase.createProduct(
                 "Gaming Mouse",
                 "Ergonomic gaming mouse with 16000 DPI sensor and customizable buttons",
-                new BigDecimal("79.99")
+                new BigDecimal("79.99"),
+                "https://example.com/products/gaming-mouse"
         );
 
         createProductUseCase.createProduct(
                 "Tablet",
                 "10-inch tablet with 64GB storage, perfect for work and entertainment",
-                new BigDecimal("329.99")
+                new BigDecimal("329.99"),
+                "https://example.com/products/tablet"
         );
 
         createProductUseCase.createProduct(
                 "Bluetooth Speaker",
                 "Portable waterproof Bluetooth speaker with 12-hour battery life",
-                new BigDecimal("89.99")
+                new BigDecimal("89.99"),
+                "https://example.com/products/bluetooth-speaker"
         );
 
         createProductUseCase.createProduct(
                 "Webcam",
                 "HD webcam with auto-focus and built-in microphone for video calls",
-                new BigDecimal("59.99")
+                new BigDecimal("59.99"),
+                "https://example.com/products/webcam"
         );
 
         createProductUseCase.createProduct(
                 "Desk Chair",
                 "Ergonomic office chair with lumbar support and adjustable height",
-                new BigDecimal("199.99")
+                new BigDecimal("199.99"),
+                "https://example.com/products/desk-chair"
         );
 
         System.out.println("Initialized 10 dummy products successfully!");

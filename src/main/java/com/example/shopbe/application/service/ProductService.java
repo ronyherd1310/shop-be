@@ -23,9 +23,9 @@ public class ProductService implements CreateProductUseCase, GetProductUseCase, 
     }
 
     @Override
-    public Product createProduct(String name, String description, BigDecimal price) {
+    public Product createProduct(String name, String description, BigDecimal price, String url) {
         Long id = idGenerator.getAndIncrement();
-        Product product = new Product(id, name, description, price);
+        Product product = new Product(id, name, description, price, url);
         return productRepository.save(product);
     }
 
